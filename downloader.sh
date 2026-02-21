@@ -46,7 +46,7 @@ log "apt update çalıştırılıyor..."
 apt update -y
 
 log "unzip ve curl kuruluyor (script için)..."
-apt install -y unzip curl
+apt install -y unzip curl debconf-utils
 
 #----------------------------------------
 # Documents klasörü + zip çekme
@@ -187,27 +187,11 @@ if [[ -d "${PATCH_DIR}/DEBIAN" ]]; then
 fi
 
 #----------------------------------------
-# ÖNEMLİ: HİÇBİR KONTROL YOK - DOĞRUDAN QEMUARM-64 YAZILIYOR
+# ÖNEMLİ DÜZELTME: DEBCONF PRE-SEEDING
 #----------------------------------------
-log "Supervisor ayarı ZORLA 'qemuarm-64' olarak yapılıyor..."
-
-# Tahmin yok, hardcoded değerler:
-arch_raw="aarch64"
-machine_val="qemuarm-64"
-
-mkdir -p /etc
-# Config dosyasını yaz
-cat <<EOF > /etc/hassio.json
-{
-  "supervisor": "ghcr.io/home-assistant/${arch_raw}-hassio-supervisor",
-  "machine": "${machine_val}",
-  "data": "/usr/share/hassio"
-}
-EOF
-
-log "Machine tipi sabitlendi: ${machine_val}"
-log "Supervisor imajı sabitlendi: ghcr.io/home-assistant/${arch_raw}-hassio-supervisor"
-
+log "Debconf ayarları qemuarm-64 olarak ayarlanıyor..."
+echo "homeassistant-supervised ha/machine-type select qemuarm-64" | debconf-set-selections
+echo "homeassistant-supervised ha/machine-type seen true" | debconf-set-selections
 #----------------------------------------
 # Home Assistant Supervised kurulumu (patched paket)
 #----------------------------------------
